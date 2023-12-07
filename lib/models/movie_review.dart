@@ -27,4 +27,20 @@ class MovieData {
       review: json['content'],
     );
   }
+  updateData(String key, dynamic value) {
+    switch (key) {
+      case 'id':
+        id = value;
+        break;
+      case 'title':
+        movieTitle = value;
+        break;
+      case 'name':
+        userName = value;
+        break;
+      case 'content':
+        review = value;
+        break;
+    }
+  }
 }
