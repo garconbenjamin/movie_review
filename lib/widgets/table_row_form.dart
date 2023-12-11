@@ -6,7 +6,7 @@ import 'package:movie_review/widgets/table_cell.dart';
 
 // ignore: non_constant_identifier_names
 TableRow TableRowForm(MovieData movieData, int index, BuildContext context,
-    void Function() deleteData) {
+    void Function() deleteRow, void Function(String, dynamic) updateRow) {
   final nameFieldKey = GlobalKey<FormBuilderFieldState>();
   final reviewFieldKey = GlobalKey<FormBuilderFieldState>();
   final titleFieldKey = GlobalKey<FormBuilderFieldState>();
@@ -39,22 +39,24 @@ TableRow TableRowForm(MovieData movieData, int index, BuildContext context,
   }
 
   Future<void> onUpdate() async {
-    // try {
-    await updateMovieReview(
-        id: movieData.id!,
-        titile: titleFieldKey.currentState!.value,
-        name: nameFieldKey.currentState!.value,
-        content: reviewFieldKey.currentState!.value);
-    showSnackBarMessage('Data updated');
-
-    // } catch (e) {
-    //   showSnackBarMessage('Failed to update data');
-    // }
+    try {
+      await updateMovieReview(
+          id: movieData.id!,
+          titile: titleFieldKey.currentState!.value,
+          name: nameFieldKey.currentState!.value,
+          content: reviewFieldKey.currentState!.value);
+      showSnackBarMessage('Data updated');
+      updateRow('title', titleFieldKey.currentState!.value);
+      updateRow('name', nameFieldKey.currentState!.value);
+      updateRow('content', reviewFieldKey.currentState!.value);
+    } catch (e) {
+      showSnackBarMessage('Failed to update data');
+    }
   }
 
   Future<void> onDelete() async {
     if (movieData.id == null) {
-      deleteData();
+      deleteRow();
       return;
     }
     try {
@@ -64,7 +66,7 @@ TableRow TableRowForm(MovieData movieData, int index, BuildContext context,
         return;
       }
       await deleteMovieReview(movieData.id!);
-      deleteData();
+      deleteRow();
     } catch (e) {
       showSnackBarMessage('Failed to delete data');
     }
@@ -72,58 +74,66 @@ TableRow TableRowForm(MovieData movieData, int index, BuildContext context,
 
   Future<void> onAdd() async {
     try {
-      await addMovieReview(
+      final newId = await addMovieReview(
           titile: titleFieldKey.currentState!.value,
           name: nameFieldKey.currentState!.value,
           content: reviewFieldKey.currentState!.value);
-
+      updateRow('id', newId);
+      updateRow('title', titleFieldKey.currentState!.value);
+      updateRow('name', nameFieldKey.currentState!.value);
+      updateRow('content', reviewFieldKey.currentState!.value);
       showSnackBarMessage('Data added');
     } catch (e) {
-      showSnackBarMessage('Failed to add data');
+      showSnackBarMessage("Failed to add data: ${e.toString()}}");
     }
   }
 
-  return (TableRow(children: [
-    TabelCell(
-        child: FormBuilderTextField(
-      decoration: const InputDecoration(border: InputBorder.none),
-      key: nameFieldKey,
-      name: "user[$nameFieldKey]",
-      initialValue: movieData.userName,
-    )),
-    TabelCell(
-        child: FormBuilderTextField(
-      decoration: const InputDecoration(border: InputBorder.none),
-      key: titleFieldKey,
-      name: "title[$nameFieldKey]",
-      initialValue: movieData.movieTitle,
-    )),
-    TabelCell(
-        child: FormBuilderTextField(
-      decoration: const InputDecoration(border: InputBorder.none),
-      key: reviewFieldKey,
-      name: "review[$index]",
-      initialValue: movieData.review,
-    )),
-    TableCell(
-      child: Row(children: [
-        if (movieData.id != null)
-          IconButton(onPressed: onUpdate, icon: const Icon(Icons.check))
-        else
-          IconButton(onPressed: onAdd, icon: const Icon(Icons.add)),
-        IconButton(
-          onPressed: onDelete,
-          icon: const Icon(Icons.delete),
-        ),
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: () {
-            nameFieldKey.currentState!.reset();
-            titleFieldKey.currentState!.reset();
-            reviewFieldKey.currentState!.reset();
-          },
-        ),
-      ]),
-    )
-  ]));
+  return (TableRow(
+      decoration: BoxDecoration(
+          color: index % 2 == 0 ? Colors.grey.withOpacity(0.1) : Colors.white),
+      children: [
+        TabelCell(child: Center(child: Text(index.toString()))),
+        TabelCell(
+            child: IntrinsicWidth(
+                child: FormBuilderTextField(
+          decoration: const InputDecoration(border: InputBorder.none),
+          key: nameFieldKey,
+          name: "user[${movieData.id}]",
+          initialValue: movieData.userName,
+        ))),
+        TabelCell(
+            child: FormBuilderTextField(
+          decoration: const InputDecoration(border: InputBorder.none),
+          key: titleFieldKey,
+          name: "title[${movieData.id}]",
+          initialValue: movieData.movieTitle,
+        )),
+        TabelCell(
+            child: FormBuilderTextField(
+          decoration: const InputDecoration(border: InputBorder.none),
+          key: reviewFieldKey,
+          name: "review[${movieData.id}]",
+          initialValue: movieData.review,
+        )),
+        TableCell(
+          child: Row(children: [
+            if (movieData.id != null)
+              IconButton(onPressed: onUpdate, icon: const Icon(Icons.check))
+            else
+              IconButton(onPressed: onAdd, icon: const Icon(Icons.add)),
+            IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete),
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                nameFieldKey.currentState!.reset();
+                titleFieldKey.currentState!.reset();
+                reviewFieldKey.currentState!.reset();
+              },
+            ),
+          ]),
+        )
+      ]));
 }

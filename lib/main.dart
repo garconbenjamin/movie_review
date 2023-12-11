@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:movie_review/api/movie_review.dart';
 import 'package:movie_review/models/movie_review.dart';
+import 'package:movie_review/widgets/table_header_cell.dart';
 import 'package:movie_review/widgets/table_row_form.dart';
 
 void main() {
@@ -35,18 +35,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var _movieData = [];
-  final _formKey = GlobalKey<FormBuilderState>();
+
   Future<void> _fetchData() async {
     final data = await getMovieReview();
     setState(() {
       _movieData = data;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchData();
   }
 
   void _addNewData() {
@@ -63,8 +57,28 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void updateRow(int index, String key, String value) {
-    print(_movieData[index].update);
+  List<TableRow> _buildTableBody() {
+    final body = <TableRow>[];
+
+    for (var i = 0; i < _movieData.length; i++) {
+      deleteRow() {
+        _deleteData(i);
+      }
+
+      updateRow(String key, value) {
+        _movieData[i].updateData(key, value);
+        setState(() {});
+      }
+
+      body.add(TableRowForm(_movieData[i], i, context, deleteRow, updateRow));
+    }
+    return body;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
   }
 
   @override
@@ -80,41 +94,39 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            FormBuilder(
-                key: _formKey,
-                child: Table(
-                  border: TableBorder(
-                    horizontalInside:
-                        BorderSide(width: 1, color: Colors.grey.shade500),
-                    verticalInside:
-                        BorderSide(width: 1, color: Colors.grey.shade300),
-                  ),
+            Table(
+              columnWidths: const {
+                0: FlexColumnWidth(1),
+                1: FlexColumnWidth(4),
+                2: FlexColumnWidth(4),
+                3: FlexColumnWidth(4),
+                4: FlexColumnWidth(2),
+              },
+              border: TableBorder(
+                horizontalInside:
+                    BorderSide(width: 1, color: Colors.grey.shade500),
+                verticalInside:
+                    BorderSide(width: 1, color: Colors.grey.shade300),
+              ),
+              children: [
+                const TableRow(
                   children: [
-                    const TableRow(
-                      children: [
-                        TableCell(child: Text('Movie Title')),
-                        TableCell(child: Text('Movie Title')),
-                        TableCell(child: Text('Review')),
-                        TableCell(child: SizedBox())
-                      ],
-                    ),
-                    for (var i = 0; i < _movieData.length; i++)
-                      TableRowForm(
-                        _movieData[i],
-                        i,
-                        context,
-                        () {
-                          _deleteData(i);
-                        },
-                      )
+                    TabelHeaderCell(text: 'Index'),
+                    TabelHeaderCell(text: 'Movie Title'),
+                    TabelHeaderCell(text: 'Movie Title'),
+                    TabelHeaderCell(text: 'Review'),
+                    TabelHeaderCell(text: ''),
                   ],
-                )),
+                ),
+                ..._buildTableBody(),
+              ],
+            ),
           ],
         ),
       )),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewData,
-        tooltip: 'Increment',
+        tooltip: 'Add new data',
         child: const Icon(Icons.add),
       ),
     );
