@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "movie_review",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--web-browser-flag=--disable-web-security"]
+    },
+    {
+      "name": "movie_review (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "movie_review (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}
