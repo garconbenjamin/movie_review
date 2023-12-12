@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _addNewData() {
-    if (_movieData.last.id != null) {
+    if (_movieData.isEmpty || _movieData.last.id != null) {
       setState(() {
         _movieData.add(MovieData(movieTitle: '', userName: '', review: ''));
       });
